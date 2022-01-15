@@ -1,16 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: payment
+  name: paymentservice
   labels:
-    app: payment
+    app: paymentservice
 spec:
   replicas: 3
-
   template:
     metadata:
       labels:
-        app: payment
+        app: paymentservice
     spec:
       containers:
         - name: server
@@ -27,4 +26,4 @@ spec:
 
   selector:
     matchLabels:
-      app: payment
+      app: paymentservice
