@@ -44,9 +44,9 @@ metadata:
   namespace: dev
   name: view
 rules:
-  - apiGroups: [""] # "" indicates the core API group
-    resources: ["pods", "replicasets", "deployments"]
-    verbs: ["get", "watch", "list"]
+  - apiGroups: ["","apps"] # "" indicates the core API group
+    resources: ["pods","replicasets","deployments"]
+    verbs: ["get","watch","list"]
 
 ---
 

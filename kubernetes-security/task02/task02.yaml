@@ -32,4 +32,4 @@ roleRef:
 subjects:
   - kind: Group
     namespace: prometheus
-    name: system:serviceaccounts
+    name: system:serviceaccounts:prometheus
