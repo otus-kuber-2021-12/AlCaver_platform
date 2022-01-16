@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: payment
+  labels:
+    app: payment
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: payment
+    spec:
+      containers:
+        - name: server
+          image: alcaver/hipster-payment:v0.0.1
+          env:
+            - name: PORT
+              value: "50051"
+            - name: DISABLE_TRACING
+              value: "1"
+            - name: DISABLE_PROFILER
+              value: "1"
+            - name: DISABLE_DEBUGGER
+              value: "1"
+
+  selector:
+    matchLabels:
+      app: payment
