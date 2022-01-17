@@ -20,7 +20,7 @@ metadata:
   namespace: dev
 
 roleRef:
-  kind: Role
+  kind: ClusterRole
   apiGroup: rbac.authorization.k8s.io
   name: admin
 
