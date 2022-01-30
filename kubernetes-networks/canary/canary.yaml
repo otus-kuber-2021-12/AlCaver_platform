@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-test
+  labels:
+    app: web-test
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web-test
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 100%
+      maxSurge: 100%
+  template:
+    metadata:
+      labels:
+        app: web-test
+    spec:
+      containers:
+        - name: web-test
+          image: alcaver/kub.hw1:v1
+          volumeMounts:
+            - name: app
+              mountPath: /app
+          readinessProbe:
+            httpGet:
+              path: /index.html
+              port: 8000
+          livenessProbe:
+            tcpSocket:
+              port: 8000
+
+      initContainers:
+        - name: web-init
+          image: busybox:stable
+          command: [ 'sh', '-c', 'wget -o /app/index.html https://i.tk-chel.ru/alex/img/2022/01/index.txt  | sh' ]
+          volumeMounts:
+            - name: app
+              mountPath: /app
+      volumes:
+        - name: app
+          emptyDir: { }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-svc-test
+spec:
+  selector:
+    app: web-test
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-canary
+  annotations:
+    kubernetes.io/ingress.class: nginx
+
+    nginx.ingress.kubernetes.io/canary: "true"
+    nginx.ingress.kubernetes.io/canary-by-header: "X-Test"
+    nginx.ingress.kubernetes.io/canary-by-header-pattern: "try"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      rewrite ^(/dashboard)$ $1/ redirect;
+
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /web(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: web-svc-test
+                port:
+                  number: 8000
