@@ -11,7 +11,7 @@ spec:
   - IPv4
   ipFamilyPolicy: SingleStack
   externalIPs:
-    - 10.100.0.3
+    - 172.17.255.1
   ports:
   - name: dns
     port: 53
@@ -35,7 +35,7 @@ spec:
     - IPv4
   ipFamilyPolicy: SingleStack
   externalIPs:
-    - 10.100.0.3
+    - 172.17.255.1
   ports:
     - name: dns
       port: 53
