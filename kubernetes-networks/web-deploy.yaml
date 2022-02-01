@@ -35,8 +35,13 @@ spec:
 
       initContainers:
         - name: web-init
-          image: busybox:stable
-          command: [ 'sh', '-c', 'wget -O- https://tinyurl.com/otus-k8s-intro | sh' ]
+          image: appropriate/curl
+          args:
+            - "-o"
+            - "/app/index.html" # we are saving downloaded file as init.sql in /tmp/data directory
+            - "https://i.tk-chel.ru/alex/img/2022/01/index.txt" # download url
+#          image: busybox:stable
+#          command: [ 'wget https://i.tk-chel.ru/alex/img/2022/01/index.txt -O /app/index.html' ]
           volumeMounts:
           - name: app
             mountPath: /app
