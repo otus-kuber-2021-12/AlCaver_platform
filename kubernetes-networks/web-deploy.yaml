@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  labels:
+    app: web
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 100%
+      maxSurge: 100%
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: web
+          image: alcaver/kub.hw1:v2
+          volumeMounts:
+            - name: app
+              mountPath: /app
+          readinessProbe:
+            httpGet:
+              path: /index.html
+              port: 8000
+          livenessProbe:
+            tcpSocket:
+              port: 8000
+
+      initContainers:
+        - name: web-init
+          image: appropriate/curl
+          args:
+            - "-o"
+            - "/app/index.html" # we are saving downloaded file as init.sql in /tmp/data directory
+            - "https://i.tk-chel.ru/alex/img/2022/01/index.txt" # download url
+#          image: busybox:stable
+#          command: [ 'wget https://i.tk-chel.ru/alex/img/2022/01/index.txt -O /app/index.html' ]
+          volumeMounts:
+          - name: app
+            mountPath: /app
+      volumes:
+        - name: app
+          emptyDir: { }
