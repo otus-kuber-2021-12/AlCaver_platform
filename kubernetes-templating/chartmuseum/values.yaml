@@ -1,0 +1,19 @@
+## Ingress for load balancer
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt
+
+## Chartmuseum Ingress hostnames
+## Must be provided if Ingress is enabled
+##
+  hosts:
+    - name: chartmuseum.alex.agx.ru
+      path: /
+      tls: true
+      tlsSecret: chm-agx-tls
+    - name: chartmuseum.104.155.83.200.nip.io
+      path: /
+      tls: true
+      tlsSecret: chartmuseum.nip-tls
