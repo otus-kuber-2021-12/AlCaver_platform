@@ -14,6 +14,9 @@ spec:
       containers:
         - name: nginx
           image: alcaver/nginx:v2
+          ports:
+            - containerPort: 8080
+              name: web
           volumeMounts:
             - mountPath: /etc/nginx/nginx.conf
               name: confvol

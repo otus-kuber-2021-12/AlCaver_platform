@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mynginx-exporter
+  labels:
+    app: mynginx-exporter
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mynginx-exporter
+    spec:
+      containers:
+        - name: nginx-exporter
+          image: nginx/nginx-prometheus-exporter:0.10.0
+          ports:
+            - containerPort: 9113
+              name: web
+          env:
+            - name: SCRAPE_URI
+              value: "http://mynginx-svc-lb/basic_status"
+  selector:
+    matchLabels:
+      app: mynginx-exporter
