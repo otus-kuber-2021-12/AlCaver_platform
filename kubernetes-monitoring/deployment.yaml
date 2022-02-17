@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mynginx
+  labels:
+    app: mynginx
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: mynginx
+    spec:
+      containers:
+        - name: nginx
+          image: alcaver/nginx:v2
+          ports:
+            - containerPort: 8080
+              name: web
+          volumeMounts:
+            - mountPath: /etc/nginx/nginx.conf
+              name: confvol
+              subPath: nginx.conf
+            - mountPath: /app
+              name: app
+
+        - name: nginx-exporter
+          image: nginx/nginx-prometheus-exporter:0.10.0
+          ports:
+            - containerPort: 9113
+              name: metrics
+          env:
+            - name: SCRAPE_URI
+              value: "http://localhost:8080/basic_status"
+
+      initContainers:
+        - name: web-init
+#          image: appropriate/curl
+#          args:
+#            - "-o"
+#            - "/app/index.html" # we are saving downloaded file as init.sql in /tmp/data directory
+#            - "https://i.tk-chel.ru/alex/img/2022/01/index.txt" # download url
+          image: busybox:stable
+          command: [ 'sh', '-c', 'wget -O- https://tinyurl.com/otus-k8s-intro | sh' ]
+          volumeMounts:
+            - name: app
+              mountPath: /app
+      volumes:
+        - name: confvol
+          configMap:
+            name: mynginx
+        - name: app
+          emptyDir: { }
+  selector:
+    matchLabels:
+      app: mynginx
