@@ -41,6 +41,11 @@ spec:
                   type: string
                 storage_size:
                   type: string
+            status:
+              type: object
+              properties:
+                message:
+                  type: string
   names:                # различные форматы имени объекта CR
     kind: MySQL         # kind CR
     plural: mysqls

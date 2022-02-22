@@ -3,6 +3,7 @@ import kopf
 import yaml
 import kubernetes
 import time
+import requests
 from jinja2 import Environment,  FileSystemLoader
 
 
@@ -38,9 +39,19 @@ def wait_until_job_end(jobname):
                     job_finished = True
 
 
+
+
+# @kopf.timer('otus.homework', 'v1', 'mysqls', interval=5)
+# def poll_cf_status(spec, patch, **kwargs):
+# #     cf_status = requests.get(id=spec.get('id'))
+#     print('tick')
+#     patch.status['message'] = 'Hello world'
+
+
+
 @kopf.on.create('otus.homework', 'v1', 'mysqls')
 # Функция, которая будет запускаться при создании объектов тип MySQL:
-def mysql_on_create(body, spec, **kwargs):
+def mysql_on_create(body, spec, patch, **kwargs):
     name = body['metadata']['name']
     image = body['spec']['image'] # cохраняем в переменные содержимое описания MySQL из CR
     password = body['spec']['password']
@@ -78,26 +89,41 @@ def mysql_on_create(body, spec, **kwargs):
 # Создаем mysql Deployment:
     api = kubernetes.client.AppsV1Api()
     api.create_namespaced_deployment('default', deployment)
-
+#     body.status['message'] = 'Deployment created'
+    patch.status['message'] = f'{name} created successfully'
     # Пытаемся восстановиться из backup
     try:
         api = kubernetes.client.BatchV1Api()
+        print("Creating restore job")
         api.create_namespaced_job('default', restore_job)
-    except kubernetes.client.rest.ApiException:
+        print("Restore job created")
+    except kubernetes.client.rest.ApiException as e:
         pass
+    except Exception as e:
+        print(e)
 
     try:
-        backup_pv = render_template('backup-pv.yml.j2', {'name': name})
+        backup_pv = render_template('backup-pv.yml.j2', {'name': name, 'storage_size': storage_size})
         api = kubernetes.client.CoreV1Api()
+        print("Creating backup pv")
         api.create_persistent_volume(backup_pv)
-    except kubernetes.client.rest.ApiException:
+        print("Backup pv created")
+    except kubernetes.client.rest.ApiException as e:
         pass
+    except Exception as e:
+        print(e)
+
     try:
-        backup_pvc = render_template('backup-pvc.yml.j2', {'name': name})
+        backup_pvc = render_template('backup-pvc.yml.j2', {'name': name, 'storage_size': storage_size})
         api = kubernetes.client.CoreV1Api()
+        print("Creating backup pvc")
+        print(backup_pvc)
         api.create_namespaced_persistent_volume_claim('default', backup_pvc)
-    except kubernetes.client.rest.ApiException:
+        print("Backup pvc created")
+    except kubernetes.client.rest.ApiException as e:
         pass
+    except Exception as e:
+        print(e)
 
 
 @kopf.on.delete('otus.homework', 'v1', 'mysqls')
