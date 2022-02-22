@@ -15,5 +15,5 @@ spec:
       serviceAccountName: mysql-operator
       containers:
         - name: operator
-          image: "alcaver/operator:0.2"
+          image: "alcaver/operator:0.3"
           imagePullPolicy: "Always"
