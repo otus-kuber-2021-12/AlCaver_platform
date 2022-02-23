@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: default
+  name: restore-{{ name }}-job
+spec:
+  template:
+    metadata:
+      name: restore-{{ name }}-job
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+            - name: init-wait
+              image: alpine
+              command: ["sh", "-c", "for i in $(seq 1 300); do nc -zvw1 {{ name }} 3306 && exit 0 || sleep 3; done; exit 1"]
+      containers:
+      - name: backup
+        image: mysql:5.7
+        imagePullPolicy: IfNotPresent
+        command:
+        - /bin/sh
+        - -c
+        - "mysql -u root -h {{ name }} -p{{ password }} {{ database }}< /backup-{{ name }}-pv/{{ name }}-dump.sql"
+        volumeMounts:
+        - name: backup-{{ name }}-pv
+          mountPath: /backup-{{ name }}-pv
+      volumes:
+      - name: backup-{{ name }}-pv
+        persistentVolumeClaim:
+          claimName: backup-{{ name }}-pvc
