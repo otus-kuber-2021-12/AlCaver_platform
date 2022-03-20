@@ -1,0 +1,13 @@
+ingress:
+  enabled: true
+  annotations: {
+#    cert-manager.io/cluster-issuer: letsencrypt
+#    kubernetes.io/ingress.class: nginx
+  }
+  path: /
+  hosts:
+    - kibana.alex.agx.ru
+#  tls:
+#    - hosts:
+#        - kibana.alex.agx.ru
+#      secretName: kibana-cert
